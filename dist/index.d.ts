@@ -1,24 +1,27 @@
 /// <reference types="node" />
-import stream from 'node:stream';
-import { S3ClientConfig } from '@aws-sdk/client-s3';
-import { DataStore, Upload, KvStore } from '@tus/utils';
+import stream from "node:stream";
+import { S3ClientConfig } from "@aws-sdk/client-s3";
+import { DataStore, Upload, KvStore } from "@tus/utils";
 type Options = {
     partSize?: number;
     useTags?: boolean;
+    directory?: string;
     maxConcurrentPartUploads?: number;
     cache?: KvStore<MetadataValue>;
     expirationPeriodInMilliseconds?: number;
     s3ClientConfig: S3ClientConfig & {
         bucket: string;
+        directory: string | undefined;
     };
 };
 export type MetadataValue = {
     file: Upload;
-    'upload-id': string;
-    'tus-version': string;
+    "upload-id": string;
+    "upload-version": string;
 };
 export declare class S3Store extends DataStore {
     private bucket;
+    private directory;
     private cache;
     private client;
     private preferredPartSize;
@@ -30,7 +33,7 @@ export declare class S3Store extends DataStore {
     maxUploadSize: 5497558138880;
     constructor(options: Options);
     protected shouldUseExpirationTags(): boolean;
-    protected useCompleteTag(value: 'true' | 'false'): string | undefined;
+    protected useCompleteTag(value: "true" | "false"): string | undefined;
     /**
      * Saves upload metadata to a `${file_id}.info` file on S3.
      * Please note that the file is empty and the metadata is saved
@@ -84,6 +87,7 @@ export declare class S3Store extends DataStore {
      */
     write(src: stream.Readable, id: string, offset: number): Promise<number>;
     getUpload(id: string): Promise<Upload>;
+    private getFilePath;
     declareUploadLength(file_id: string, upload_length: number): Promise<void>;
     remove(id: string): Promise<void>;
     protected getExpirationDate(created_at: string): Date;

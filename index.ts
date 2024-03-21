@@ -39,7 +39,7 @@ type Options = {
   cache?: KvStore<MetadataValue>;
   expirationPeriodInMilliseconds?: number;
   // Options to pass to the AWS S3 SDK.
-  s3ClientConfig: S3ClientConfig & { bucket: string, directory: string | undefined };
+  s3ClientConfig: S3ClientConfig & { bucket: string, directory?: string | undefined };
 };
 
 export type MetadataValue = {

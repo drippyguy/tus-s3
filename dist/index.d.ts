@@ -11,7 +11,7 @@ type Options = {
     expirationPeriodInMilliseconds?: number;
     s3ClientConfig: S3ClientConfig & {
         bucket: string;
-        directory: string | undefined;
+        directory?: string;
     };
 };
 export type MetadataValue = {

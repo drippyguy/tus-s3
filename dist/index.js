@@ -84,7 +84,7 @@ class S3Store extends utils_1.DataStore {
         this.minPartSize = 5242880; // 5MiB
         this.maxUploadSize = 5497558138880; // 5TiB
         const { partSize, s3ClientConfig } = options;
-        const { bucket, ...restS3ClientConfig } = s3ClientConfig;
+        const { bucket, directory, ...restS3ClientConfig } = s3ClientConfig;
         this.extensions = [
             "creation",
             "creation-with-upload",
@@ -94,7 +94,7 @@ class S3Store extends utils_1.DataStore {
         ];
         this.bucket = bucket;
         this.preferredPartSize = partSize || 8 * 1024 * 1024;
-        this.directory = options.directory ?? undefined;
+        this.directory = directory || undefined;
         this.expirationPeriodInMilliseconds =
             options.expirationPeriodInMilliseconds ?? 0;
         this.useTags = options.useTags ?? true;
@@ -192,7 +192,7 @@ class S3Store extends utils_1.DataStore {
     async uploadPart(metadata, readStream, partNumber) {
         const data = await this.client.uploadPart({
             Bucket: this.bucket,
-            Key: metadata.file.id,
+            Key: this.getFilePath(metadata.file.id),
             UploadId: metadata["upload-id"],
             PartNumber: partNumber,
             Body: readStream,
@@ -374,7 +374,7 @@ class S3Store extends utils_1.DataStore {
     async finishMultipartUpload(metadata, parts) {
         const response = await this.client.completeMultipartUpload({
             Bucket: this.bucket,
-            Key: metadata.file.id,
+            Key: this.getFilePath(metadata.file.id),
             UploadId: metadata["upload-id"],
             MultipartUpload: {
                 Parts: parts.map((part) => {
@@ -466,7 +466,7 @@ class S3Store extends utils_1.DataStore {
     async read(id) {
         const data = await this.client.getObject({
             Bucket: this.bucket,
-            Key: id,
+            Key: this.getFilePath(id),
         });
         return data.Body;
     }

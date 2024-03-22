@@ -39,7 +39,7 @@ type Options = {
   cache?: KvStore<MetadataValue>;
   expirationPeriodInMilliseconds?: number;
   // Options to pass to the AWS S3 SDK.
-  s3ClientConfig: S3ClientConfig & { bucket: string, directory?: string | undefined };
+  s3ClientConfig: S3ClientConfig & { bucket: string, directory?: string };
 };
 
 export type MetadataValue = {
@@ -102,7 +102,7 @@ export class S3Store extends DataStore {
   constructor(options: Options) {
     super();
     const { partSize, s3ClientConfig } = options;
-    const { bucket, ...restS3ClientConfig } = s3ClientConfig;
+    const { bucket, directory, ...restS3ClientConfig } = s3ClientConfig;
     this.extensions = [
       "creation",
       "creation-with-upload",
@@ -112,7 +112,7 @@ export class S3Store extends DataStore {
     ];
     this.bucket = bucket;
     this.preferredPartSize = partSize || 8 * 1024 * 1024;
-    this.directory = options.directory ?? undefined;
+    this.directory = directory || undefined;
     this.expirationPeriodInMilliseconds =
       options.expirationPeriodInMilliseconds ?? 0;
     this.useTags = options.useTags ?? true;
@@ -228,7 +228,7 @@ export class S3Store extends DataStore {
   ): Promise<string> {
     const data = await this.client.uploadPart({
       Bucket: this.bucket,
-      Key: metadata.file.id,
+      Key: this.getFilePath(metadata.file.id),
       UploadId: metadata["upload-id"],
       PartNumber: partNumber,
       Body: readStream,
@@ -446,7 +446,7 @@ export class S3Store extends DataStore {
   ) {
     const response = await this.client.completeMultipartUpload({
       Bucket: this.bucket,
-      Key: metadata.file.id,
+      Key: this.getFilePath(metadata.file.id),
       UploadId: metadata["upload-id"],
       MultipartUpload: {
         Parts: parts.map((part) => {
@@ -559,7 +559,7 @@ export class S3Store extends DataStore {
   async read(id: string) {
     const data = await this.client.getObject({
       Bucket: this.bucket,
-      Key: id,
+      Key: this.getFilePath(id),
     });
     return data.Body as Readable;
   }

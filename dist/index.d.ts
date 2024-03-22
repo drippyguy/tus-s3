@@ -5,7 +5,6 @@ import { DataStore, Upload, KvStore } from "@tus/utils";
 type Options = {
     partSize?: number;
     useTags?: boolean;
-    directory?: string;
     maxConcurrentPartUploads?: number;
     cache?: KvStore<MetadataValue>;
     expirationPeriodInMilliseconds?: number;

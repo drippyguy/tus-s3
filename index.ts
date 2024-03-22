@@ -34,7 +34,6 @@ type Options = {
   // but may increase it to not exceed the S3 10K parts limit.
   partSize?: number;
   useTags?: boolean;
-  directory?: string;
   maxConcurrentPartUploads?: number;
   cache?: KvStore<MetadataValue>;
   expirationPeriodInMilliseconds?: number;
